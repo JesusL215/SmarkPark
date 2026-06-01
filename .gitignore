@@ -1,0 +1,35 @@
+# -------------------------------------
+# 1. Configuración de IntelliJ IDEA
+# -------------------------------------
+.idea/
+*.iml
+*.iws
+
+# -------------------------------------
+# 2. Archivos compilados de Java
+# -------------------------------------
+*.class
+
+# -------------------------------------
+# 3. Archivos generados por Maven
+# -------------------------------------
+target/
+pom.xml.tag
+pom.xml.releaseBackup
+pom.xml.versionsBackup
+pom.xml.next
+
+# -------------------------------------
+# 4. Archivos del Sistema Operativo
+# -------------------------------------
+.DS_Store
+Thumbs.db
+
+### Eclipse ###
+.apt_generated
+.classpath
+.factorypath
+.project
+.settings
+.springBeans
+.sts4-cache
