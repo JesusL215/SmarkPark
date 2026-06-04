@@ -82,5 +82,4 @@ Este proyecto fue desarrollado bajo una simulación de entorno profesional conti
 * **Feature Branches:** Una rama por cada módulo (ej. feature/domain-and-daos, feature/parking-services).
 * **Pull Requests & Code Review:** Fusiones a la rama integradora develop previa revisión por pares y aprobaciones.
 * **Resolución de Conflictos & Bugfix:** Manejo y documentación de Merge Conflicts y creación de ramas bugfix/ para parches.
-* **GitHub Actions:** Automatización de flujos de Integración Continua (CI) para compilar el proyecto en cada PR.
 * **Releases & Tags:** Versionamiento semántico del proyecto para entregas estables en la rama main.
