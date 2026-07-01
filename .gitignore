@@ -1,36 +1,40 @@
-# -------------------------------------
-# 1. Configuración de IntelliJ IDEA
-# -------------------------------------
-.idea/
-*.iml
-*.iws
+# ==========================================
+# 1. ARCHIVOS DE SEGURIDAD (¡MUY IMPORTANTE!)
+# ==========================================
 .env
+backend/.env
+frontend/.env
+*.properties.local
+*.yml.local
 
-# -------------------------------------
-# 2. Archivos compilados de Java
-# -------------------------------------
-*.class
-
-# -------------------------------------
-# 3. Archivos generados por Maven
-# -------------------------------------
+# ==========================================
+# 2. CARPETAS COMPILADAS DE MAVEN
+# ==========================================
 target/
+frontend/target/
+backend/target/
 pom.xml.tag
 pom.xml.releaseBackup
 pom.xml.versionsBackup
 pom.xml.next
 
-# -------------------------------------
-# 4. Archivos del Sistema Operativo
-# -------------------------------------
-.DS_Store
-Thumbs.db
-
-### Eclipse ###
-.apt_generated
+# ==========================================
+# 3. CONFIGURACIONES DE IDEs (IntelliJ, Eclipse, VSCode)
+# ==========================================
+.idea/
+*.iml
+*.iws
+.vscode/
 .classpath
-.factorypath
 .project
-.settings
+.settings/
+.apt_generated/
+.factorypath
 .springBeans
 .sts4-cache
+
+# ==========================================
+# 4. ARCHIVOS DEL SISTEMA OPERATIVO
+# ==========================================
+.DS_Store
+Thumbs.db
