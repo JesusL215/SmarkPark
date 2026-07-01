@@ -1,6 +1,6 @@
-package com.smartpark.backend.pattern.Decorator;
+package com.smartpark.backend.pattern.decorator;
 
-public class ServiceDecorator {
+public abstract class ServiceDecorator implements IParkingCost {
     protected IParkingCost parkingCost;
 
     public ServiceDecorator(IParkingCost parkingCost) {
