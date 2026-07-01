@@ -2,6 +2,7 @@
 # 1. ARCHIVOS DE SEGURIDAD (¡MUY IMPORTANTE!)
 # ==========================================
 .env
+.env.local
 backend/.env
 frontend/.env
 *.properties.local
