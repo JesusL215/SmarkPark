@@ -20,7 +20,7 @@ public class SmartparkBackendApplication {
 		return args -> {
 			// Solo inserta los datos si la tabla está completamente vacía
 			if (slotRepository.count() == 0) {
-				System.out.println("⚙️ Base de datos vacía detectada. Insertando espacios por defecto...");
+				System.out.println("Base de datos vacía detectada. Insertando espacios por defecto...");
 
 				// Zona de Autos
 				slotRepository.save(new ParkingSlot(null, "A1", "DISPONIBLE", "AUTO"));
