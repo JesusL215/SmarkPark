@@ -134,32 +134,23 @@ public class MainDashboardController {
     }
 
     @FXML
-    private void handleRegistrarSalida() {
+    public void handleRegistrarSalida() {
+        String placa = txtPlacaSalida.getText().trim();
+        boolean conLavado = chkLavado.isSelected();
+
+        if(placa.isEmpty()) {
+            mostrarAlerta("Por favor ingrese la placa del vehículo.");
+            return;
+        }
+
         try {
-            String placa = placaSalidaTextField.getText();
-            if(placa.isEmpty()) {
-                mostrarAlerta(Alert.AlertType.WARNING, "Alerta", "Ingrese una placa");
-                return;
-            }
-
-            // *Nota para tu equipo*: Por ahora necesitamos el ID del ticket para la salida.
-            // Como reto, deben crear un endpoint en el backend que busque el ticket por placa (GET /api/tickets/buscar?placa=XYZ).
-            // Para probar que la conexión funciona, vamos a simular que el ID es 1 por ahora.
-            Long ticketIdSimulado = 1L;
-
-            // Petición POST al Backend
-            Ticket pagado = apiClient.registrarSalida(ticketIdSimulado, lavadoCheckBox.isSelected());
-
-            mostrarAlerta(Alert.AlertType.INFORMATION, "Salida Registrada", "Total a pagar: S/" + pagado.getCostoTotal());
-
-            placaSalidaTextField.clear();
-            lavadoCheckBox.setSelected(false);
-
-            // Refrescamos el mapa
-            cargarDatosDesdeBackend();
-
+            // Ahora le pasamos la Placa (texto) al API Cliente
+            Ticket ticketPagado = apiClient.registrarSalida(placa, conLavado);
+            mostrarAlerta("¡Salida registrada exitosamente!\nTotal a pagar: S/ " + ticketPagado.getCostoTotal());
+            cargarDatos(); // Para actualizar los colores en pantalla
+            txtPlacaSalida.clear();
         } catch (Exception e) {
-            mostrarAlerta(Alert.AlertType.ERROR, "Error de API", e.getMessage());
+            mostrarAlerta("API Error: " + e.getMessage());
         }
     }
 

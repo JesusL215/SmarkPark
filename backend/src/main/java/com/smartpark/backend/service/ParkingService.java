@@ -75,4 +75,28 @@ public class ParkingService {
 
         return ticketRepository.save(ticket);
     }
+
+    @Transactional
+    public Ticket registrarSalidaPorPlaca(String placa, boolean conLavado) throws Exception {
+        // 1. Buscamos el ticket activo por la placa del vehículo
+        Ticket ticket = ticketRepository.findActiveTicketByPlaca(placa)
+                .orElseThrow(() -> new Exception("No hay ningún ticket activo para la placa: " + placa));
+
+        // 2. Aplicamos exactamente la misma lógica de cobro y liberación
+        ticket.setHoraSalida(LocalDateTime.now());
+
+        IParkingCost costoFinal = new BaseParkingCost(ticket);
+        if (conLavado) {
+            costoFinal = new CarWashDecorator(costoFinal);
+        }
+
+        ticket.setCostoTotal(costoFinal.getCosto());
+        ticket.setEstado("PAGADO");
+
+        ParkingSlot slot = ticket.getParkingSlot();
+        slot.setEstado("DISPONIBLE");
+        parkingSlotRepository.save(slot);
+
+        return ticketRepository.save(ticket);
+    }
 }
