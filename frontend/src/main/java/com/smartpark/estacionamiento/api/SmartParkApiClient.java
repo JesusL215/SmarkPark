@@ -13,7 +13,7 @@ import java.util.List;
 
 public class SmartParkApiClient {
 
-    private static final String BASE_URL = "http://localhost:8080/api";
+    private static final String BASE_URL = "https://smarkpark.onrender.com/api";
     private final HttpClient httpClient;
     private final Gson gson;
 
