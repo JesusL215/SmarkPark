@@ -134,23 +134,27 @@ public class MainDashboardController {
     }
 
     @FXML
-    public void handleRegistrarSalida() {
-        String placa = txtPlacaSalida.getText().trim();
-        boolean conLavado = chkLavado.isSelected();
+    private void handleRegistrarSalida() {
+        String placa = placaSalidaTextField.getText().trim();
+        boolean conLavado = lavadoCheckBox.isSelected();
 
         if(placa.isEmpty()) {
-            mostrarAlerta("Por favor ingrese la placa del vehículo.");
+            mostrarAlerta(Alert.AlertType.WARNING, "Alerta", "Por favor ingrese la placa del vehículo.");
             return;
         }
 
         try {
-            // Ahora le pasamos la Placa (texto) al API Cliente
             Ticket ticketPagado = apiClient.registrarSalida(placa, conLavado);
-            mostrarAlerta("¡Salida registrada exitosamente!\nTotal a pagar: S/ " + ticketPagado.getCostoTotal());
-            cargarDatos(); // Para actualizar los colores en pantalla
-            txtPlacaSalida.clear();
+
+            mostrarAlerta(Alert.AlertType.INFORMATION, "Salida Registrada", "¡Salida registrada exitosamente!\nTotal a pagar: S/ " + ticketPagado.getCostoTotal());
+
+            placaSalidaTextField.clear();
+            lavadoCheckBox.setSelected(false);
+
+            cargarDatosDesdeBackend();
+
         } catch (Exception e) {
-            mostrarAlerta("API Error: " + e.getMessage());
+            mostrarAlerta(Alert.AlertType.ERROR, "Error de API", e.getMessage());
         }
     }
 
