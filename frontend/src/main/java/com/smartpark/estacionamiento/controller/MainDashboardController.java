@@ -139,22 +139,22 @@ public class MainDashboardController {
 
     @FXML
     private void handleRegistrarSalida() {
+        String placa = placaSalidaTextField.getText().trim();
+        boolean conLavado = lavadoCheckBox.isSelected();
+
+        if(placa.isEmpty()) {
+            mostrarAlerta(Alert.AlertType.WARNING, "Alerta", "Por favor ingrese la placa del vehículo.");
+            return;
+        }
+
         try {
-            String placa = placaSalidaTextField.getText().trim();
-            if(placa.isEmpty()) {
-                mostrarAlerta(Alert.AlertType.WARNING, "Alerta", "Ingrese una placa");
-                return;
-            }
+            Ticket ticketPagado = apiClient.registrarSalida(placa, conLavado);
 
-            // Ahora le pasamos directamente la variable 'placa' (String) a nuestro apiClient
-            Ticket pagado = apiClient.registrarSalida(placa, lavadoCheckBox.isSelected());
-
-            mostrarAlerta(Alert.AlertType.INFORMATION, "Salida Registrada", "Total a pagar: S/" + pagado.getCostoTotal());
+            mostrarAlerta(Alert.AlertType.INFORMATION, "Salida Registrada", "¡Salida registrada exitosamente!\nTotal a pagar: S/ " + ticketPagado.getCostoTotal());
 
             placaSalidaTextField.clear();
             lavadoCheckBox.setSelected(false);
 
-            // Refrescamos el mapa
             cargarDatosDesdeBackend();
 
         } catch (Exception e) {

@@ -49,8 +49,9 @@ public class SmartParkApiClient {
         throw new Exception("Error al registrar entrada: " + response.body());
     }
 
-    // <-- Restaurado el metodo corregido con String placa
+    // Cambiamos Long ticketId por String placa
     public Ticket registrarSalida(String placa, boolean conLavado) throws Exception {
+        // Apuntamos a la nueva ruta /salida/placa/{placa}
         String url = String.format("%s/tickets/salida/placa/%s?conLavado=%b", BASE_URL, placa, conLavado);
         HttpRequest request = HttpRequest.newBuilder()
                 .uri(URI.create(url))

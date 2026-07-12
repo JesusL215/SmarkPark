@@ -37,4 +37,16 @@ public class TicketController {
             return ResponseEntity.badRequest().body(e.getMessage());
         }
     }
+
+    @PostMapping("/salida/placa/{placa}")
+    public ResponseEntity<?> registrarSalidaPorPlaca(
+            @PathVariable String placa,
+            @RequestParam boolean conLavado) {
+        try {
+            Ticket ticket = parkingService.registrarSalidaPorPlaca(placa, conLavado);
+            return ResponseEntity.ok(ticket);
+        } catch (Exception e) {
+            return ResponseEntity.badRequest().body(e.getMessage());
+        }
+    }
 }
