@@ -4,6 +4,7 @@ import com.google.gson.Gson;
 import com.google.gson.reflect.TypeToken;
 import com.smartpark.estacionamiento.model.domain.ParkingSlot;
 import com.smartpark.estacionamiento.model.domain.Ticket;
+import com.smartpark.estacionamiento.model.domain.Usuario;
 
 import java.net.URI;
 import java.net.http.HttpClient;
@@ -34,12 +35,11 @@ public class SmartParkApiClient {
     }
 
     public Ticket registrarEntrada(String placa, String tipoVehiculo, Long slotId) throws Exception {
-        // Creamos la petición POST con los parámetros en la URL (como los espera el backend)
         String url = String.format("%s/tickets/entrada?placa=%s&tipoVehiculo=%s&slotId=%d",
                 BASE_URL, placa, tipoVehiculo, slotId);
         HttpRequest request = HttpRequest.newBuilder()
                 .uri(URI.create(url))
-                .POST(HttpRequest.BodyPublishers.noBody()) // En este caso los datos van en la URL
+                .POST(HttpRequest.BodyPublishers.noBody())
                 .build();
 
         HttpResponse<String> response = httpClient.send(request, HttpResponse.BodyHandlers.ofString());
@@ -63,5 +63,20 @@ public class SmartParkApiClient {
             return gson.fromJson(response.body(), Ticket.class);
         }
         throw new Exception("Error al registrar salida: " + response.body());
+    }
+
+    public Usuario login(String username, String password) throws Exception {
+        String url = String.format("%s/auth/login?username=%s&password=%s", BASE_URL, username, password);
+        HttpRequest request = HttpRequest.newBuilder()
+                .uri(URI.create(url))
+                .POST(HttpRequest.BodyPublishers.noBody())
+                .build();
+
+        HttpResponse<String> response = httpClient.send(request, HttpResponse.BodyHandlers.ofString());
+
+        if (response.statusCode() == 200) {
+            return gson.fromJson(response.body(), Usuario.class);
+        }
+        throw new Exception("Usuario o contraseña incorrectos");
     }
 }

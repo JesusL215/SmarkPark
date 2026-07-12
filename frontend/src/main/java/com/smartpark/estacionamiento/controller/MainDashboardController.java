@@ -5,8 +5,12 @@ import com.smartpark.estacionamiento.model.domain.ParkingSlot;
 import com.smartpark.estacionamiento.model.domain.Ticket;
 import javafx.application.Platform;
 import javafx.fxml.FXML;
+import javafx.fxml.FXMLLoader;
+import javafx.scene.Parent;
+import javafx.scene.Scene;
 import javafx.scene.control.*;
 import javafx.scene.layout.GridPane;
+import javafx.stage.Stage;
 
 import java.util.List;
 import java.util.stream.Collectors;
@@ -171,6 +175,24 @@ public class MainDashboardController {
     @FXML
     private void handleVerHistorial() {
         mostrarAlerta(Alert.AlertType.INFORMATION, "Próximamente", "El historial se consumirá desde la base de datos en la nube en el Sprint 2.");
+    }
+
+    @FXML
+    private void handleCerrarSesion() {
+        try {
+            // Obtenemos la ventana actual
+            Stage stage = (Stage) placaTextField.getScene().getWindow();
+
+            // Cargamos la vista del Login
+            Parent root = FXMLLoader.load(getClass().getResource("/com/smartpark/estacionamiento/view/Login.fxml"));
+
+            // Volvemos a poner la escena del login en la misma ventana
+            stage.setTitle("SmartPark - Iniciar Sesión");
+            stage.setScene(new Scene(root, 1000, 650));
+
+        } catch (Exception e) {
+            mostrarAlerta(Alert.AlertType.ERROR, "Error", "No se pudo cerrar sesión: " + e.getMessage());
+        }
     }
 
     private void mostrarAlerta(Alert.AlertType tipo, String titulo, String contenido) {
