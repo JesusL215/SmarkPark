@@ -15,7 +15,7 @@ public class DatabaseSeeder implements CommandLineRunner {
 
     private final UsuarioRepository usuarioRepository;
     private final ParkingSlotRepository slotRepository;
-    private final PasswordEncoder passwordEncoder; // Inyectamos la herramienta de encriptación
+    private final PasswordEncoder passwordEncoder;
 
     @Override
     public void run(String... args) throws Exception {

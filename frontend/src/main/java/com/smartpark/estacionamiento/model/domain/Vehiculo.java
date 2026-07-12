@@ -16,10 +16,6 @@ public abstract class Vehiculo {
         this.propietario = propietario;
     }
 
-    /**
-     * Método abstracto. Cada subclase (Auto, Moto) deberá
-     * implementar este método y definir su propia tarifa.
-     */
     public abstract double getTarifaPorHora();
 
     // --- Getters y Setters (sin cambios) ---
