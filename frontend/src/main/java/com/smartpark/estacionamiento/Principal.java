@@ -25,14 +25,12 @@ public class Principal extends Application {
             Parent root = FXMLLoader.load(fxmlUrl);
 
             // 2. Ajustamos el tamaño de la ventana (400x450 es ideal para un login)
-            Scene scene = new Scene(root, 400, 450);
+            Scene scene = new Scene(root, 1000, 650);
 
             // 3. Cambiamos el título
             primaryStage.setTitle("SmartPark - Iniciar Sesión");
             primaryStage.setScene(scene);
-
-            // 4. (Opcional) Evitar que el usuario agrande la ventana de login
-            primaryStage.setResizable(false);
+            primaryStage.show();
 
             primaryStage.show();
         } catch (IOException e) {

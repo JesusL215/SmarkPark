@@ -16,7 +16,6 @@ public class LoginController {
     @FXML private TextField txtUsername;
     @FXML private PasswordField txtPassword;
 
-    // Agregamos 'final' para que IntelliJ no se queje
     private final SmartParkApiClient apiClient = new SmartParkApiClient();
 
     @FXML
@@ -30,20 +29,19 @@ public class LoginController {
         }
 
         try {
-            // 1. Enviamos los datos al backend
+            // 1. Validamos credenciales en el backend
             Usuario usuarioLogueado = apiClient.login(username, password);
 
-            // 2. Si es exitoso, cerramos la ventana de Login
-            Stage loginStage = (Stage) txtUsername.getScene().getWindow();
-            loginStage.close();
+            // 2. Obtenemos la ventana (Stage) actual donde está el Login
+            Stage stage = (Stage) txtUsername.getScene().getWindow();
 
-            // 3. Y abrimos el Dashboard principal
+            // 3. Cargamos el diseño del Dashboard
             FXMLLoader loader = new FXMLLoader(getClass().getResource("/com/smartpark/estacionamiento/view/MainDashboard.fxml"));
             Parent root = loader.load();
-            Stage mainStage = new Stage();
-            mainStage.setTitle("SmartPark - Gestión Inteligente (" + usuarioLogueado.getRol() + ")");
-            mainStage.setScene(new Scene(root, 1000, 650));
-            mainStage.show();
+
+            // 4. Reemplazamos el contenido de la ventana actual SIN cerrarla
+            stage.setTitle("SmartPark - Gestión Inteligente (" + usuarioLogueado.getRol() + ")");
+            stage.setScene(new Scene(root, 1000, 650));
 
         } catch (Exception e) {
             mostrarAlerta(Alert.AlertType.ERROR, "Acceso Denegado", e.getMessage());
