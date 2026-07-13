@@ -9,7 +9,7 @@ import javafx.fxml.FXMLLoader;
 import javafx.scene.Parent;
 import javafx.scene.Scene;
 import javafx.scene.control.*;
-import javafx.scene.layout.GridPane;
+import javafx.scene.layout.*;
 import javafx.stage.Stage;
 
 import java.util.List;
@@ -22,6 +22,9 @@ public class MainDashboardController {
     @FXML private CheckBox lavadoCheckBox;
     @FXML private Label statusLabel;
     @FXML private GridPane parkingGrid;
+    @FXML private BorderPane mainBorderPane;
+    @FXML private HBox vistaDashboard;
+    @FXML private Button btnAdministracion;
 
     // ¡NUEVO: Nuestro único puente de comunicación con el Backend!
     private SmartParkApiClient apiClient;
@@ -193,6 +196,38 @@ public class MainDashboardController {
         } catch (Exception e) {
             mostrarAlerta(Alert.AlertType.ERROR, "Error", "No se pudo cerrar sesión: " + e.getMessage());
         }
+    }
+
+    // 1. Oculta el botón si el usuario NO es ADMIN
+    public void inicializarSesion(String rolUsuario) {
+        if (!"ADMIN".equalsIgnoreCase(rolUsuario)) {
+            btnAdministracion.setVisible(false);
+            btnAdministracion.setManaged(false); // Evita que deje un hueco vacío en el menú
+        }
+    }
+
+    // 2. Navegar a la vista de Administración
+    @FXML
+    private void handleVerAdministracion() {
+        try {
+            FXMLLoader loader = new FXMLLoader(getClass().getResource("/com/smartpark/estacionamiento/view/AdminSlots.fxml"));
+            Parent adminView = loader.load();
+
+            // Reemplazamos el centro con la nueva pantalla
+            mainBorderPane.setCenter(adminView);
+        } catch (Exception e) {
+            mostrarAlerta(Alert.AlertType.ERROR, "Error de Navegación", "No se pudo cargar el panel: " + e.getMessage());
+            e.printStackTrace(); // Para ver en consola si falta algún import o hay error de FXML
+        }
+    }
+
+    // 3. Regresar al mapa principal
+    @FXML
+    private void handleVerDashboard() {
+        // Volvemos a colocar la vista original guardada en memoria
+        mainBorderPane.setCenter(vistaDashboard);
+        // Refrescamos los datos por si el Admin agregó un espacio nuevo
+        cargarDatosDesdeBackend();
     }
 
     private void mostrarAlerta(Alert.AlertType tipo, String titulo, String contenido) {

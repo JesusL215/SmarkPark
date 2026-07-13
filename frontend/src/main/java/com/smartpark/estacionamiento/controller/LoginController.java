@@ -38,6 +38,9 @@ public class LoginController {
             // 3. Cargamos el diseño del Dashboard
             FXMLLoader loader = new FXMLLoader(getClass().getResource("/com/smartpark/estacionamiento/view/MainDashboard.fxml"));
             Parent root = loader.load();
+            // Pasamos el rol al MainDashboardController
+            MainDashboardController controller = loader.getController();
+            controller.inicializarSesion(usuarioLogueado.getRol());
 
             // 4. Reemplazamos el contenido de la ventana actual SIN cerrarla
             stage.setTitle("SmartPark - Gestión Inteligente (" + usuarioLogueado.getRol() + ")");

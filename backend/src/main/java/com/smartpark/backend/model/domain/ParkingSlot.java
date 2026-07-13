@@ -1,9 +1,9 @@
 package com.smartpark.backend.model.domain;
 
 import jakarta.persistence.*;
+import lombok.AllArgsConstructor;
 import lombok.Data;
 import lombok.NoArgsConstructor;
-import lombok.AllArgsConstructor;
 
 @Data
 @NoArgsConstructor
@@ -16,13 +16,15 @@ public class ParkingSlot {
     @GeneratedValue(strategy = GenerationType.IDENTITY)
     private Long id;
 
+    // unique = true evita espacios duplicados en la base de datos
     @Column(unique = true, nullable = false, length = 10)
-    private String numero; // Ejemplo: "A1", "B2"
+    private String numero;
+
+    // Estados permitidos: DISPONIBLE, OCUPADO, RESERVADO, MANTENIMIENTO
+    @Column(nullable = false, length = 20)
+    private String estado;
 
     @Column(nullable = false, length = 20)
-    private String estado; // "DISPONIBLE", "OCUPADO", "MANTENIMIENTO"
-
-    @Column(name = "tipo_permitido", length = 20)
-    private String tipoVehiculoPermitido; // "AUTO", "MOTO", "AMBOS"
+    private String tipoVehiculoPermitido;
 
 }
