@@ -18,7 +18,8 @@ public class ReporteDashboardDTO {
 
     private List<MovimientoDTO> movimientosRecientes;
 
-    public ReporteDashboardDTO() {}
+    public ReporteDashboardDTO() {
+    }
 
     public int getVehiculosIngresadosHoy() {
         return vehiculosIngresadosHoy;
