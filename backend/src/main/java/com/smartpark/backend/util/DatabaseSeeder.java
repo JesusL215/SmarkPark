@@ -10,6 +10,7 @@ import lombok.RequiredArgsConstructor;
 import org.springframework.boot.CommandLineRunner;
 import org.springframework.security.crypto.password.PasswordEncoder;
 import org.springframework.stereotype.Component;
+import org.springframework.beans.factory.annotation.Value;
 
 @Component
 @RequiredArgsConstructor
@@ -20,15 +21,27 @@ public class DatabaseSeeder implements CommandLineRunner {
     private final PasswordEncoder passwordEncoder;
     private final TarifaRepository tarifaRepository;
 
+    @Value("${smartpark.admin.username}")
+    private String adminUsername;
+
+    @Value("${smartpark.admin.password}")
+    private String adminPassword;
+
+    @Value("${smartpark.operador.username}")
+    private String operadorUsername;
+
+    @Value("${smartpark.operador.password}")
+    private String operadorPassword;
+
     @Override
     public void run(String... args) throws Exception {
 
-        // 1. Crear usuarios con CONTRASEÑAS ENCRIPTADAS
+        // 1. Crear usuarios con credenciales inyectadas y encriptadas
         if (usuarioRepository.count() == 0) {
-            System.out.println("Seeder: Creando usuarios seguros...");
+            System.out.println("Seeder: Creando usuarios desde variables de entorno...");
 
-            usuarioRepository.save(new Usuario(null, "admin", passwordEncoder.encode("admin123"), "ADMIN"));
-            usuarioRepository.save(new Usuario(null, "operador", passwordEncoder.encode("operador123"), "OPERADOR"));
+            usuarioRepository.save(new Usuario(null, adminUsername, passwordEncoder.encode(adminPassword), "ADMIN"));
+            usuarioRepository.save(new Usuario(null, operadorUsername, passwordEncoder.encode(operadorPassword), "OPERADOR"));
         }
 
         // 2. Insertar slots
