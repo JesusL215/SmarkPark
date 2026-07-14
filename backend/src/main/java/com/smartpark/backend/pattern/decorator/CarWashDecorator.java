@@ -1,7 +1,7 @@
 package com.smartpark.backend.pattern.decorator;
 
 public class CarWashDecorator extends ServiceDecorator {
-    private final double costoLavado; // ¡NUEVO!
+    private final double costoLavado;
 
     public CarWashDecorator(IParkingCost parkingCost, double costoLavado) {
         super(parkingCost);
