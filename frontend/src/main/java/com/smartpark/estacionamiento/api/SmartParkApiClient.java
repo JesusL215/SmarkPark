@@ -1,28 +1,44 @@
 package com.smartpark.estacionamiento.api;
 
-import com.google.gson.Gson;
+import com.google.gson.*;
 import com.google.gson.reflect.TypeToken;
 import com.smartpark.estacionamiento.model.domain.ParkingSlot;
 import com.smartpark.estacionamiento.model.domain.Ticket;
 import com.smartpark.estacionamiento.model.domain.Usuario;
 import com.smartpark.estacionamiento.model.domain.Tarifa;
-
+import com.smartpark.estacionamiento.model.dto.ReporteDashboardDTO;
 import java.net.URI;
 import java.net.http.HttpClient;
 import java.net.http.HttpRequest;
 import java.net.http.HttpResponse;
 import java.util.List;
 import java.lang.reflect.Type;
+import java.time.LocalDateTime;
+import java.time.format.DateTimeFormatter;
 
 public class SmartParkApiClient {
 
-    private static final String BASE_URL = "http://localhost:8080/api";
+    private static final String BASE_URL = "https://smarkpark.onrender.com/api";
     private final HttpClient httpClient;
     private final Gson gson;
 
     public SmartParkApiClient() {
         this.httpClient = HttpClient.newHttpClient();
-        this.gson = new Gson();
+        // CONFIGURACIÓN DEL ADAPTADOR GSON PARA LOCALDATETIME
+        this.gson = new GsonBuilder()
+
+                .registerTypeAdapter(LocalDateTime.class,
+                        (JsonDeserializer<LocalDateTime>) (json, type, context) ->
+                                LocalDateTime.parse(
+                                        json.getAsString(),
+                                        DateTimeFormatter.ISO_LOCAL_DATE_TIME))
+
+                .registerTypeAdapter(LocalDateTime.class,
+                        (JsonSerializer<LocalDateTime>) (src, type, context) ->
+                                new JsonPrimitive(
+                                        src.format(DateTimeFormatter.ISO_LOCAL_DATE_TIME)))
+
+                .create();
     }
 
     public List<ParkingSlot> obtenerTodosLosSlots() throws Exception {
@@ -51,9 +67,7 @@ public class SmartParkApiClient {
         throw new Exception("Error al registrar entrada: " + response.body());
     }
 
-    // Cambiamos Long ticketId por String placa
     public Ticket registrarSalida(String placa, boolean conLavado) throws Exception {
-        // Apuntamos a la nueva ruta /salida/placa/{placa}
         String url = String.format("%s/tickets/salida/placa/%s?conLavado=%b", BASE_URL, placa, conLavado);
         HttpRequest request = HttpRequest.newBuilder()
                 .uri(URI.create(url))
@@ -81,6 +95,7 @@ public class SmartParkApiClient {
         }
         throw new Exception("Usuario o contraseña incorrectos");
     }
+
     public ParkingSlot crearSlot(ParkingSlot slot) throws Exception {
         HttpRequest request = HttpRequest.newBuilder()
                 .uri(URI.create(BASE_URL + "/slots"))
@@ -126,14 +141,11 @@ public class SmartParkApiClient {
                 .uri(URI.create(BASE_URL + "/tarifas"))
                 .GET().build();
 
-        // Agregamos <String> a HttpResponse
         HttpResponse<String> response = httpClient.send(request, HttpResponse.BodyHandlers.ofString());
         if (response.statusCode() == 200) {
-            // Sintaxis correcta del TypeToken con <List<Tarifa>>
             Type listType = new TypeToken<List<Tarifa>>(){}.getType();
             return gson.fromJson(response.body(), listType);
         }
-        // Exception requiere un String, concatenamos un mensaje
         throw new Exception("Error al obtener tarifas: " + response.body());
     }
 
@@ -144,7 +156,6 @@ public class SmartParkApiClient {
                 .PUT(HttpRequest.BodyPublishers.ofString(gson.toJson(tarifa)))
                 .build();
 
-        // Agregamos <String> a HttpResponse
         HttpResponse<String> response = httpClient.send(request, HttpResponse.BodyHandlers.ofString());
         if (response.statusCode() == 200) {
             return gson.fromJson(response.body(), Tarifa.class);
@@ -158,14 +169,11 @@ public class SmartParkApiClient {
                 .GET()
                 .build();
 
-        // AQUÍ ESTÁ LA CORRECCIÓN: Agregamos <byte[]> al HttpResponse
         HttpResponse<byte[]> response = httpClient.send(request, HttpResponse.BodyHandlers.ofByteArray());
 
         if (response.statusCode() == 200) {
-            return response.body(); // Ahora Java sabe que esto es un arreglo de bytes
+            return response.body();
         }
-
-        // Si hay error, convertimos explícitamente los bytes a texto
         throw new Exception("Error al generar PDF: " + new String(response.body()));
     }
 
@@ -176,10 +184,42 @@ public class SmartParkApiClient {
 
         HttpResponse<String> response = httpClient.send(request, HttpResponse.BodyHandlers.ofString());
         if (response.statusCode() == 200) {
-            // Asegúrate de que los <List<String>> estén bien escritos
             Type listType = new TypeToken<List<String>>(){}.getType();
             return gson.fromJson(response.body(), listType);
         }
         throw new Exception("Error al obtener placas activas");
+    }
+
+    public ReporteDashboardDTO obtenerDatosDashboard() throws Exception {
+        HttpRequest request = HttpRequest.newBuilder()
+                .uri(URI.create(BASE_URL + "/tickets/reportes/dashboard"))
+                .GET()
+                .build();
+
+        HttpResponse<String> response = httpClient.send(request, HttpResponse.BodyHandlers.ofString());
+
+        if (response.statusCode() == 200) {
+            return gson.fromJson(response.body(), ReporteDashboardDTO.class);
+        }
+        throw new Exception("Error al cargar datos del dashboard: " + response.body());
+    }
+
+    public List<Ticket> obtenerTodosLosTickets() throws Exception {
+
+        HttpRequest request = HttpRequest.newBuilder()
+                .uri(URI.create(BASE_URL + "/tickets"))
+                .GET()
+                .build();
+
+        HttpResponse<String> response =
+                httpClient.send(request, HttpResponse.BodyHandlers.ofString());
+
+        if (response.statusCode() == 200) {
+            Type listType = new TypeToken<List<Ticket>>() {}.getType();
+            return gson.fromJson(response.body(), listType);
+        }
+
+        throw new Exception("Error al obtener el historial de tickets: "
+                + response.body());
     }
 }
