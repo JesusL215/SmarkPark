@@ -10,23 +10,33 @@ import java.io.IOException;
 import java.net.URL;
 
 public class Principal extends Application {
+
     @Override
     public void start(Stage primaryStage) {
         try {
-            String fxmlPath = "/com/smartpark/estacionamiento/view/MainDashboard.fxml";
+            // 1. Cambiamos la vista inicial al Login
+            String fxmlPath = "/com/smartpark/estacionamiento/view/Login.fxml";
             URL fxmlUrl = getClass().getResource(fxmlPath);
+
             if (fxmlUrl == null) {
                 throw new IOException("No se pudo encontrar el archivo FXML: " + fxmlPath);
             }
+
             Parent root = FXMLLoader.load(fxmlUrl);
-            Scene scene = new Scene(root);
-            primaryStage.setTitle("Sistema de Gestión de Estacionamiento");
+
+            // 2. Ajustamos el tamaño de la ventana (400x450 es ideal para un login)
+            Scene scene = new Scene(root, 1000, 650);
+
+            primaryStage.setTitle("SmartPark - Iniciar Sesión");
             primaryStage.setScene(scene);
+            primaryStage.show();
+
             primaryStage.show();
         } catch (IOException e) {
             e.printStackTrace();
         }
     }
+
     public static void main(String[] args) {
         launch(args);
     }

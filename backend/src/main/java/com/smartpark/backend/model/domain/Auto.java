@@ -8,5 +8,5 @@ import lombok.NoArgsConstructor;
 @DiscriminatorValue("AUTO")
 @NoArgsConstructor
 public class Auto extends Vehiculo {
-    // Aquí puedes agregar atributos específicos de los autos en el futuro (ej. numeroPuertas)
+
 }
