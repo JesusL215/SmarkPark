@@ -14,6 +14,7 @@ import javafx.scene.control.*;
 import javafx.scene.layout.*;
 import javafx.stage.Stage;
 import javafx.stage.FileChooser;
+import javafx.stage.Modality;
 import java.io.File;
 import java.nio.file.Files;
 
@@ -30,17 +31,20 @@ public class MainDashboardController {
     @FXML private BorderPane mainBorderPane;
     @FXML private HBox vistaDashboard;
     @FXML private Button btnAdministracion;
+    @FXML private Button btnDashboard;
+    @FXML private Button btnReportes;
+    @FXML private Button btnHistorial;
 
     private SmartParkApiClient apiClient;
     private List<ParkingSlot> slotsActuales;
-    private AutoCompletionBinding autoCompletionBinding;
+    private AutoCompletionBinding<String> autoCompletionBinding;
 
     @FXML
     public void initialize() {
         this.apiClient = new SmartParkApiClient();
         tipoVehiculoComboBox.getItems().addAll("AUTO", "MOTO");
 
-        configurarFiltrosDeTexto(); // <--- 1. Configuramos las mayúsculas (Una sola vez)
+        configurarFiltrosDeTexto();
         cargarDatosDesdeBackend();
 
         tipoVehiculoComboBox.getSelectionModel().selectedItemProperty().addListener(
@@ -54,7 +58,7 @@ public class MainDashboardController {
             actualizarMapaVisual();
             filtrarSlotsDisponibles(tipoVehiculoComboBox.getValue());
 
-            renovarAutocompletado(); // <--- 2. ¡La magia en tiempo real!
+            renovarAutocompletado();
 
             statusLabel.setText("Conectado al servidor Spring Boot. Mapa actualizado.");
         } catch (Exception e) {
@@ -69,24 +73,54 @@ public class MainDashboardController {
         int row = 0;
 
         for (ParkingSlot slot : slotsActuales) {
-            Button btn = new Button(slot.getNumero() + "\n" + slot.getTipoVehiculoPermitido());
-            btn.setPrefSize(80, 60);
-            btn.getStyleClass().add("slot-button");
+            Button btnSlot = new Button();
+            btnSlot.setPrefSize(80, 80); // Tamaño uniforme cuadrado
 
-            if ("DISPONIBLE".equals(slot.getEstado())) {
-                btn.getStyleClass().add("slot-free");
-            } else {
-                btn.getStyleClass().add("slot-occupied");
+            // 1. Lógica para decidir qué texto y color poner
+            String textoBoton = slot.getNumero() + "\n" + slot.getTipoVehiculoPermitido();
+            String estiloCss;
+
+            switch (slot.getEstado().toUpperCase()) {
+                case "DISPONIBLE":
+                    estiloCss = "-fx-background-color: #2ecc71; -fx-text-fill: white; -fx-font-weight: bold; -fx-background-radius: 8;";
+                    break;
+
+                case "OCUPADO":
+                    // Si está ocupado, intentamos mostrar la placa. Si no llega, mostramos "OCUPADO"
+                    String textoOcupado = (slot.getPlacaActiva() != null && !slot.getPlacaActiva().isEmpty())
+                            ? slot.getPlacaActiva()
+                            : "OCUPADO";
+                    textoBoton = slot.getNumero() + "\n" + textoOcupado;
+                    estiloCss = "-fx-background-color: #e74c3c; -fx-text-fill: white; -fx-font-weight: bold; -fx-background-radius: 8;";
+                    break;
+
+                case "MANTENIMIENTO":
+                    estiloCss = "-fx-background-color: #f1c40f; -fx-text-fill: #2c3e50; -fx-font-weight: bold; -fx-background-radius: 8;";
+                    textoBoton = slot.getNumero() + "\nEN MANT.";
+                    break;
+
+                case "RESERVADO":
+                    estiloCss = "-fx-background-color: #3498db; -fx-text-fill: white; -fx-font-weight: bold; -fx-background-radius: 8;";
+                    break;
+
+                default:
+                    estiloCss = "-fx-background-color: #bdc3c7; -fx-text-fill: #2c3e50; -fx-background-radius: 8;";
+                    break;
             }
 
-            btn.setOnAction(e -> {
+            // 2. Aplicamos el texto y el estilo al botón
+            btnSlot.setText(textoBoton);
+            btnSlot.setStyle(estiloCss);
+
+            // 3. Acción al hacer clic en el botón del mapa
+            btnSlot.setOnAction(e -> {
                 if ("DISPONIBLE".equals(slot.getEstado())) {
                     tipoVehiculoComboBox.setValue(slot.getTipoVehiculoPermitido());
                     slotComboBox.setValue(slot.getNumero());
                 }
             });
 
-            parkingGrid.add(btn, col, row);
+            parkingGrid.add(btnSlot, col, row);
             col++;
             if (col > 3) { col = 0; row++; }
         }
@@ -203,12 +237,36 @@ public class MainDashboardController {
 
     @FXML
     private void handleVerReporte() {
-        mostrarAlerta(Alert.AlertType.INFORMATION, "Próximamente", "Los reportes se generarán en PDF desde el servidor en el Sprint 2.");
+        try {
+            javafx.fxml.FXMLLoader loader = new javafx.fxml.FXMLLoader(getClass().getResource("/com/smartpark/estacionamiento/view/AdminDashboardAnalitico.fxml"));
+            javafx.scene.Parent root = loader.load();
+
+            javafx.stage.Stage stage = new javafx.stage.Stage();
+            stage.setTitle("SmartPark - Rentabilidad y Analíticas");
+            stage.setScene(new javafx.scene.Scene(root));
+
+            stage.setWidth(1100);
+            stage.setHeight(700);
+            stage.centerOnScreen();
+
+            stage.initModality(javafx.stage.Modality.APPLICATION_MODAL);
+            stage.show();
+        } catch (Exception e) {
+            e.printStackTrace();
+            mostrarAlerta(javafx.scene.control.Alert.AlertType.ERROR, "Error de Interfaz", "No se pudo cargar la pantalla de reportes: " + e.getMessage());
+        }
     }
 
     @FXML
     private void handleVerHistorial() {
-        mostrarAlerta(Alert.AlertType.INFORMATION, "Próximamente", "El historial se consumirá desde la base de datos en la nube en el Sprint 2.");
+        try {
+            javafx.fxml.FXMLLoader loader = new javafx.fxml.FXMLLoader(getClass().getResource("/com/smartpark/estacionamiento/view/Historial.fxml"));
+            javafx.scene.Parent historialView = loader.load();
+            mainBorderPane.setCenter(historialView);
+            actualizarBotonActivo(btnHistorial);
+        } catch (Exception e) {
+            mostrarAlerta(Alert.AlertType.ERROR, "Error", "No se pudo cargar el historial.");
+        }
     }
 
     @FXML
@@ -236,6 +294,7 @@ public class MainDashboardController {
             FXMLLoader loader = new FXMLLoader(getClass().getResource("/com/smartpark/estacionamiento/view/AdminSlots.fxml"));
             Parent adminView = loader.load();
             mainBorderPane.setCenter(adminView);
+            actualizarBotonActivo(btnAdministracion);
         } catch (Exception e) {
             mostrarAlerta(Alert.AlertType.ERROR, "Error de Navegación", "No se pudo cargar el panel: " + e.getMessage());
             e.printStackTrace();
@@ -246,6 +305,7 @@ public class MainDashboardController {
     private void handleVerDashboard() {
         mainBorderPane.setCenter(vistaDashboard);
         cargarDatosDesdeBackend();
+        actualizarBotonActivo(btnDashboard);
     }
 
     //Este método lo llamaremos UNA SOLA VEZ desde initialize()
@@ -272,7 +332,7 @@ public class MainDashboardController {
             }
 
             // Traemos los datos frescos de Spring Boot
-            List placasActivas = apiClient.obtenerPlacasActivas();
+            List<String> placasActivas = apiClient.obtenerPlacasActivas();
 
             // Creamos un nuevo autocompletado y guardamos su referencia
             autoCompletionBinding = TextFields.bindAutoCompletion(placaSalidaTextField, placasActivas);
@@ -290,5 +350,18 @@ public class MainDashboardController {
             alerta.setContentText(contenido);
             alerta.showAndWait();
         });
+    }
+
+    private void actualizarBotonActivo(Button botonActivo) {
+        // Removemos la clase de todos los botones
+        btnDashboard.getStyleClass().remove("nav-button-active");
+        btnReportes.getStyleClass().remove("nav-button-active");
+        btnHistorial.getStyleClass().remove("nav-button-active");
+        btnAdministracion.getStyleClass().remove("nav-button-active");
+
+        // Se la agregamos solo al seleccionado
+        if (botonActivo != null) {
+            botonActivo.getStyleClass().add("nav-button-active");
+        }
     }
 }

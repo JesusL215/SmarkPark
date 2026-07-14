@@ -2,13 +2,17 @@ package com.smartpark.backend.controller;
 
 import com.smartpark.backend.model.domain.Ticket;
 import com.smartpark.backend.service.ParkingService;
-import lombok.RequiredArgsConstructor;
-import org.springframework.http.ResponseEntity;
-import org.springframework.web.bind.annotation.*;
 import com.smartpark.backend.service.PdfReportService;
+import com.smartpark.backend.service.TicketService;
 import com.smartpark.backend.repository.TicketRepository;
+import com.smartpark.backend.model.dto.ReporteDashboardDTO;
+import lombok.RequiredArgsConstructor;
+import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.http.HttpHeaders;
 import org.springframework.http.MediaType;
+import org.springframework.http.ResponseEntity;
+import org.springframework.web.bind.annotation.*;
+
 import java.util.List;
 
 @RestController
@@ -16,17 +20,18 @@ import java.util.List;
 @RequiredArgsConstructor
 public class TicketController {
 
+    @Autowired
+    private TicketService ticketService;
     private final ParkingService parkingService;
     private final TicketRepository ticketRepository;
     private final PdfReportService pdfReportService;
 
     @GetMapping("/{id}/recibo")
-    public ResponseEntity descargarRecibo(@PathVariable Long id) {
+    public ResponseEntity<byte[]> descargarRecibo(@PathVariable Long id) {
         try {
             Ticket ticket = ticketRepository.findById(id)
                     .orElseThrow(() -> new IllegalArgumentException("Ticket no encontrado"));
 
-            // Si no está pagado, no deberíamos emitir el recibo final
             if (!"PAGADO".equals(ticket.getEstado())) {
                 return ResponseEntity.badRequest().body(null);
             }
@@ -34,7 +39,6 @@ public class TicketController {
             byte[] pdfBytes = pdfReportService.generarReciboPdf(ticket);
 
             HttpHeaders headers = new HttpHeaders();
-            // Le decimos al navegador/cliente que esto es un archivo descargable
             headers.setContentType(MediaType.APPLICATION_PDF);
             headers.setContentDispositionFormData("attachment", "Recibo-" + ticket.getVehiculo().getPlaca() + ".pdf");
 
@@ -87,5 +91,17 @@ public class TicketController {
     @GetMapping("/activos/placas")
     public ResponseEntity<List<String>> obtenerPlacasActivas() {
         return ResponseEntity.ok(ticketRepository.findPlacasActivas());
+    }
+
+    @GetMapping("/reportes/dashboard")
+    public ResponseEntity<ReporteDashboardDTO> obtenerDatosDashboard(
+            @RequestParam(required = false) String fechaFiltro) {
+        return ResponseEntity.ok(ticketService.generarDatosDashboard(fechaFiltro));
+    }
+
+    @GetMapping
+    public ResponseEntity<List<Ticket>> obtenerTodosLosTickets() {
+        // Usamos el servicio para devolver todos los tickets de la base de datos
+        return ResponseEntity.ok(ticketService.obtenerTodos());
     }
 }
